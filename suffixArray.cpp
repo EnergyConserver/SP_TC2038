@@ -162,7 +162,7 @@ void SuffixArray::construirLCP() {
     }
 }
 
-//Compara un patrón con un sufijo desde una posición determinada.
+//Construye la tabla LPS para el algoritmo KMP.
 vector<int> construirLPS(string patron) {
     int m = patron.size();
     vector<int> lps(m, 0);
@@ -186,6 +186,7 @@ vector<int> construirLPS(string patron) {
     return lps;
 }
 
+//Busca un patrón dentro de un texto usando KMP.
 int buscarKMP(string texto, string patron) {
     vector<int> lps = construirLPS(patron);
 
@@ -204,7 +205,7 @@ int buscarKMP(string texto, string patron) {
     return -1;
 }
 
-//Calcula el LCP entre dos sufijos usando los rangos construidos.s
+//Calcula el LCP entre dos sufijos usando los rangos construidos.
 int SuffixArray::obtenerLCP(int a, int b) {
     if (a == b)
         return texto.size() - a;
