@@ -13,6 +13,7 @@ private:
     vector<int> lcp;
     vector<int> posicionSA;
     vector<vector<int>> rangos;
+    void ordenarCounting(vector<int>& sa, vector<int>& rango, int k);
 public:
     SuffixArray(string);
     void construir();
@@ -30,6 +31,7 @@ SuffixArray::SuffixArray(string texto) {
     construirLCP();
 }
 
+//Construye el Suffix Array usando Prefix Doubling.
 void SuffixArray::construir() {
     int n = texto.size();
     if (n == 0) return;
@@ -38,28 +40,21 @@ void SuffixArray::construir() {
     vector<int> rango(n);
     vector<int> nuevoRango(n);
 
+    //Cada posición comienza con el rango de su carácter.
     for (int i = 0; i < n; i++) {
         sa[i] = i;
         rango[i] = texto[i];
     }
     rangos.push_back(rango);
 
+    //Duplica la longitud de comparación en cada iteración.
     for (int k = 1; k < n; k *= 2) {
-        sort(sa.begin(), sa.end(), [this, &rango, k](int a, int b) {
-            if (rango[a] != rango[b]) return rango[a] < rango[b];
-            int A, B;
-
-            if (a + k < texto.size()) A = rango[a + k];
-            else A = -1;
-
-            if (b + k < texto.size()) B = rango[b + k];
-            else B = -1;
-
-            return A < B;
-        });
+        //Ordena los sufijos según sus dos bloques de rango.
+        ordenarCounting(sa, rango, k);
 
         nuevoRango[sa[0]] = 0;
         
+        //Asigna nuevos rangos según el orden obtenido.
         for (int i = 1; i < n; i++) {
             int anterior = sa[i-1];
             int actual = sa[i];
@@ -80,16 +75,73 @@ void SuffixArray::construir() {
 
         rango = nuevoRango;
         rangos.push_back(rango);
+        //Termina cuando todos los sufijos tienen un rango diferente.
         if (rango[sa[n-1]] == n-1) break;
     }
 }
 
+void SuffixArray::ordenarCounting(
+    vector<int>& sa,
+    vector<int>& rango,
+    int k
+) {
+    int n = sa.size();
+
+    vector<int> temporal(n);
+    vector<int> contador(n + 1, 0);
+
+    // Primera pasada: segundo rango
+    for (int i = 0; i < n; i++) {
+        int posicion = sa[i] + k;
+        int segundo;
+
+        if (posicion < n) segundo = rango[posicion] + 1;
+        else segundo = 0;
+        contador[segundo]++;
+    }
+
+    // Convierte las cantidades en posiciones acumuladas
+    for (int i = 1; i <= n; i++) contador[i] += contador[i - 1];
+
+    // Ordenamiento estable por segundo rango
+    for (int i = n - 1; i >= 0; i--) {
+        int posicion = sa[i] + k;
+        int segundo;
+
+        if (posicion < n) segundo = rango[posicion] + 1;
+        else segundo = 0;
+
+        temporal[--contador[segundo]] = sa[i];
+    }
+
+    // Reinicia los contadores
+    fill(contador.begin(), contador.end(), 0);
+
+    // Segunda pasada: primer rango
+    for (int i = 0; i < n; i++) {
+        int primero = rango[temporal[i]] + 1;
+        contador[primero]++;
+    }
+
+    for (int i = 1; i <= n; i++) contador[i] += contador[i - 1];
+
+    // Ordenamiento estable por primer rango
+    for (int i = n - 1; i >= 0; i--) {
+        int posicion = temporal[i];
+        int primero = rango[posicion] + 1;
+
+        sa[--contador[primero]] = posicion;
+    }
+}
+
+//Construye el arreglo LCP usando el algoritmo de Kasai.
 void SuffixArray::construirLCP() {
     int n = texto.size();
 
     lcp.resize(n);
     posicionSA.resize(n);
 
+    //Guarda la posición de cada sufijo dentro del Suffix Array.
     for (int i = 0; i < n; i++) {
         posicionSA[sa[i]] = i;
     }
@@ -101,6 +153,7 @@ void SuffixArray::construirLCP() {
 
         if (pos == 0) continue;
 
+        //Compara el sufijo con el anterior en el Suffix Array.
         int j = sa[pos - 1];
         while (i + k < n && j + k < n && texto[i + k] == texto[j + k]) {
             k++;
@@ -111,6 +164,7 @@ void SuffixArray::construirLCP() {
     }
 }
 
+//Compara un patrón con un sufijo desde una posición determinada.
 int SuffixArray::comparar(string patron, int pos) {
     int i = 0;
 
@@ -125,6 +179,7 @@ int SuffixArray::comparar(string patron, int pos) {
     return -1;
 }
 
+//Busca un patrón dentro del texto mediante búsqueda binaria.
 int SuffixArray::buscar(string patron) {
     int izquierda = 0;
     int derecha = sa.size() - 1;
@@ -141,8 +196,8 @@ int SuffixArray::buscar(string patron) {
     return -1;
 }
 
+//Calcula el LCP entre dos sufijos usando los rangos construidos.s
 int SuffixArray::obtenerLCP(int a, int b) {
-
     if (a == b)
         return texto.size() - a;
 
@@ -150,13 +205,9 @@ int SuffixArray::obtenerLCP(int a, int b) {
     int n = texto.size();
     int resultado = 0;
 
-
-    for (int nivel = rangos.size() - 1;
-         nivel >= 0;
-         nivel--) {
-
+    //Avanza por los niveles más grandes posibles.
+    for (int nivel = rangos.size() - 1; nivel >= 0; nivel--) {
         int longitud = 1 << nivel;
-
 
         if (a + resultado + longitud <= n &&
             b + resultado + longitud <= n &&
@@ -171,10 +222,13 @@ int SuffixArray::obtenerLCP(int a, int b) {
     return resultado;
 }
 
+//Encuentra el palíndromo más largo del texto.
 pair<int, int> SuffixArray::palindromoMasLargo() {
     int n = texto.size();
     string reverso = texto;
     reverse(reverso.begin(), reverso.end());
+    
+    //Combina el texto con su reverso para comparar ambas direcciones.
     string combinado = texto + "#" + reverso;
     SuffixArray suffix(combinado);
 
@@ -227,16 +281,19 @@ pair<int, int> SuffixArray::palindromoMasLargo() {
     return {mejorInicio, mejorFin};
 }
 
+//Encuentra la subcadena común más larga entre dos textos.
 pair<int, int> SuffixArray::subcadenaComunMasLarga(string otroTexto) {
     int n1 = texto.size();
     int n2 = otroTexto.size();
     string combinado = texto + "#" + otroTexto;
 
+    //Une ambos textos para construir un solo Suffix Array.
     SuffixArray suffix(combinado);
 
     int mejorLongitud = 0;
     int mejorInicio = 0;
 
+    //Busca sufijos consecutivos que pertenezcan a textos diferentes.
     for (int i = 1; i < suffix.sa.size(); i++) {
 
         int pos1 = suffix.sa[i - 1];
@@ -255,6 +312,7 @@ pair<int, int> SuffixArray::subcadenaComunMasLarga(string otroTexto) {
             if (pos2 < n1) restante2 = n1 - pos2;
             else restante2 = combinado.size() - pos2 - 1;
 
+            //Evita que el separador '#' sea parte de la subcadena.
             longitud = min(longitud, restante1);
             longitud = min(longitud, restante2);
 
@@ -269,6 +327,7 @@ pair<int, int> SuffixArray::subcadenaComunMasLarga(string otroTexto) {
                 if (primeroEnTexto1) inicio = pos1;
                 else inicio = pos2;
 
+                //En empate, conserva la aparición más a la izquierda.
                 if (mejorInicio == -1 || inicio < mejorInicio) mejorInicio = inicio;
             }
         }
