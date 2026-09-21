@@ -3,6 +3,7 @@
 #include <string>
 #include <algorithm>
 #include "suffixArray.cpp"
+#include "visualizer.hpp"
 using namespace std;
 
 int main() {
@@ -34,33 +35,83 @@ int main() {
         m3 += linea;
     }
 
-    SuffixArray suffix1(t1);
-    SuffixArray suffix2(t2);
-    string codigos[] = {m1, m2, m3}; 
-
-    for (int i = 0; i < 3; i++) {
-        int posicion = buscarKMP(t1, codigos[i]);
-
-        if (posicion != -1) cout << "true " << posicion + 1 << endl;
-        else cout << "false" << endl;
-    }
-
-    for (int i = 0; i < 3; i++) {
-        int posicion = buscarKMP(t2, codigos[i]);
-
-        if (posicion != -1) cout << "true " << posicion + 1<< endl;
-        else cout << "false" << endl;
-    }
+    SuffixArray suffix1(t1, "transmission1.txt");
+    SuffixArray suffix2(t2, "transmission2.txt");
+    string codigos[] = {m1, m2, m3};
 
     pair<int, int> resultado1 = suffix1.palindromoMasLargo();
-    cout << resultado1.first + 1 << " " << resultado1.second + 1 << endl;
-
     pair<int, int> resultado2 = suffix2.palindromoMasLargo();
-    cout << resultado2.first + 1 << " " << resultado2.second + 1 << endl;
-
     pair<int, int> comun = suffix1.subcadenaComunMasLarga(t2);
-    if (comun.first != -1) cout << comun.first + 1 << " " << comun.second + 1 << endl;
-    else cout << "-1 -1" << endl;
 
+    while (true) {
+        char opcion = mostrarInicio();
+
+        if (opcion == '1') {
+            visualizarPrefixDoubling(
+                suffix1.obtenerEstadosPrefix(),
+                t1,
+                "transmission1.txt",
+                suffix2.obtenerEstadosPrefix(),
+                t2,
+                "transmission2.txt"
+            );
+        } else if (opcion == '2') {
+            cout << "\nSeleccione el mcode:\n";
+            cout << "1. mcode1\n";
+            cout << "2. mcode2\n";
+            cout << "3. mcode3\n";
+            cout << "\nOpcion: ";
+
+            char mcode;
+            cin >> mcode;
+            cin.ignore();
+
+            int indice = mcode - '1';
+
+            if (indice >= 0 && indice < 3) {
+                vector<EstadoKMP> estadosT1;
+                vector<EstadoKMP> estadosT2;
+
+                int posicion1 = buscarKMP(
+                    t1,
+                    codigos[indice],
+                    estadosT1
+                );
+
+                int posicion2 = buscarKMP(
+                    t2,
+                    codigos[indice],
+                    estadosT2
+                );
+
+                visualizarBusqueda(
+                    estadosT1,
+                    t1,
+                    "transmission1.txt",
+                    estadosT2,
+                    t2,
+                    "transmission2.txt",
+                    codigos[indice]
+                );
+            }
+        } else if (opcion == '3') {
+            visualizarPalindromo(
+                suffix1.obtenerEstadosPalindromo(),
+                t1,
+                "transmission1.txt",
+                suffix2.obtenerEstadosPalindromo(),
+                t2,
+                "transmission2.txt"
+            );
+        } else if (opcion == '4') {
+            visualizarSubcadena(
+                suffix1.obtenerEstadosSubcadena(),
+                t1,
+                t2,
+                "transmission1.txt",
+                "transmission2.txt"
+            );
+        } else if (opcion == '5') break;
+    }
     return 0;
 }
