@@ -39,14 +39,14 @@ int main() {
     string codigos[] = {m1, m2, m3}; 
 
     for (int i = 0; i < 3; i++) {
-        int posicion = suffix1.buscarKMP(t1, codigos[i]);
+        int posicion = buscarKMP(t1, codigos[i]);
 
         if (posicion != -1) cout << "true " << posicion + 1 << endl;
         else cout << "false" << endl;
     }
 
     for (int i = 0; i < 3; i++) {
-        int posicion = suffix2.buscarKMP(t2, codigos[i]);
+        int posicion = buscarKMP(t2, codigos[i]);
 
         if (posicion != -1) cout << "true " << posicion + 1<< endl;
         else cout << "false" << endl;

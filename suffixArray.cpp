@@ -18,8 +18,6 @@ public:
     SuffixArray(string);
     void construir();
     void construirLCP();
-    vector<int> construirLPS(string patron);
-    int buscarKMP(string texto, string patron);
     int obtenerLCP(int, int);
     pair<int, int> palindromoMasLargo();
     pair<int, int> subcadenaComunMasLarga(string);
@@ -165,7 +163,7 @@ void SuffixArray::construirLCP() {
 }
 
 //Compara un patrón con un sufijo desde una posición determinada.
-vector<int> SuffixArray::construirLPS(string patron) {
+vector<int> construirLPS(string patron) {
     int m = patron.size();
     vector<int> lps(m, 0);
 
@@ -188,7 +186,7 @@ vector<int> SuffixArray::construirLPS(string patron) {
     return lps;
 }
 
-int SuffixArray::buscarKMP(string texto, string patron) {
+int buscarKMP(string texto, string patron) {
     vector<int> lps = construirLPS(patron);
 
     int i = 0;
@@ -294,7 +292,6 @@ pair<int, int> SuffixArray::palindromoMasLargo() {
 //Encuentra la subcadena común más larga entre dos textos.
 pair<int, int> SuffixArray::subcadenaComunMasLarga(string otroTexto) {
     int n1 = texto.size();
-    int n2 = otroTexto.size();
     string combinado = texto + "#" + otroTexto;
 
     //Une ambos textos para construir un solo Suffix Array.
