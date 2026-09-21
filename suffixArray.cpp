@@ -18,8 +18,8 @@ public:
     SuffixArray(string);
     void construir();
     void construirLCP();
-    int comparar(string, int);
-    int buscar(string);
+    vector<int> construirLPS(string patron);
+    int buscarKMP(string texto, string patron);
     int obtenerLCP(int, int);
     pair<int, int> palindromoMasLargo();
     pair<int, int> subcadenaComunMasLarga(string);
@@ -165,33 +165,43 @@ void SuffixArray::construirLCP() {
 }
 
 //Compara un patrón con un sufijo desde una posición determinada.
-int SuffixArray::comparar(string patron, int pos) {
-    int i = 0;
+vector<int> SuffixArray::construirLPS(string patron) {
+    int m = patron.size();
+    vector<int> lps(m, 0);
 
-    while (i < patron.size() && pos + i < texto.size()) {
-        if (patron[i] < texto[pos + i]) return -1;
-        if (patron[i] > texto[pos + i]) return 1;
-        i++;
+    int longitud = 0;
+    int i = 1;
+
+    while (i < m) {
+        if (patron[i] == patron[longitud]) {
+            longitud++;
+            lps[i] = longitud;
+            i++;
+        } else {
+            if (longitud != 0) longitud = lps[longitud - 1];
+            else {
+                lps[i] = 0;
+                i++;
+            }
+        }
     }
-
-    if (i == patron.size())
-        return 0;
-    return -1;
+    return lps;
 }
 
-//Busca un patrón dentro del texto mediante búsqueda binaria.
-int SuffixArray::buscar(string patron) {
-    int izquierda = 0;
-    int derecha = sa.size() - 1;
+int SuffixArray::buscarKMP(string texto, string patron) {
+    vector<int> lps = construirLPS(patron);
 
-    while (izquierda <= derecha) {
-
-        int medio = (izquierda + derecha) / 2;
-        int resultado = comparar(patron, sa[medio]);
-
-        if (resultado == 0) return sa[medio];
-        if (resultado < 0) derecha = medio - 1;
-        else izquierda = medio + 1;
+    int i = 0;
+    int j = 0;
+    while (i < texto.size()) {
+        if (texto[i] == patron[j]) {
+            i++;
+            j++;
+            if (j == patron.size()) return i - j;
+        } else {
+            if (j != 0) j = lps[j - 1];
+            else i++;
+        }
     }
     return -1;
 }
