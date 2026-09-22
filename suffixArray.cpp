@@ -114,6 +114,7 @@ void SuffixArray::construir(string nombre) {
 
     //Duplica la longitud de comparación en cada iteración.
     for (int k = 1; k < n; k *= 2) {
+        estadosPrefix.push_back({k, sa, rango});
         //Ordena los sufijos según sus dos bloques de rango.
         ordenarCounting(sa, rango, k);
 
@@ -140,7 +141,6 @@ void SuffixArray::construir(string nombre) {
 
         rango = nuevoRango;
         rangos.push_back(rango);
-        estadosPrefix.push_back({k, sa, rango});
 
         //Termina cuando todos los sufijos tienen un rango diferente.
         if (rango[sa[n-1]] == n-1) break;
