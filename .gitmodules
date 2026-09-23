@@ -1,0 +1,3 @@
+[submodule "MenuNcurses"]
+	path = MenuNcurses
+	url = https://github.com/AlguienSasaki/MenuNcurses
