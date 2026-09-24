@@ -1,12 +1,12 @@
 #include "visualizer.hpp"
-#include "MenuNcurses/MenuNcurses.hpp"
+#include "vendor/MenuNcurses/MenuNcurses.hpp"
 #include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string>
 
-//const string ROJO = "\033[31m";
-//const string RESET = "\033[0m";
+// const string ROJO = "\033[31m";
+// const string RESET = "\033[0m";
 
 using namespace std;
 
@@ -79,8 +79,7 @@ void visualizarPrefixDoubling(const vector<EstadoPrefix> &estadosT1,
 
           "k = " + to_string((*estados)[estadoActual].k),
 
-          "Aca el resto pero de mientra debería servir para probar."
-          };
+      };
       DetalleNcurses menuPrincipal("Prefix Doubling", info);
       menuPrincipal.mostrar();
 
