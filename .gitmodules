@@ -1,3 +1,7 @@
 [submodule "MenuNcurses"]
 	path = MenuNcurses
 	url = https://github.com/AlguienSasaki/MenuNcurses
+[submodule "vendor/MenuNcurses"]
+	path = vendor/MenuNcurses
+	url = https://github.com/AlguienSasaki/MenuNcurses
+	branch = main
