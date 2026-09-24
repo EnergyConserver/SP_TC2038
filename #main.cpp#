@@ -2,7 +2,6 @@
 #include "visualizer.hpp"
 #include <fstream>
 #include <string>
-#include <vector>
 using namespace std;
 
 int main() {
@@ -21,18 +20,25 @@ int main() {
     init_pair(5, COLOR_CYAN, -1);   // Par 5: Cian
   }
 
-  keypad(stdscr, TRUE); // Permite capturar teclas especiales como flechas[cite: 13]
-  curs_set(0);          // Oculta el cursor[cite: 13]
+  keypad(stdscr,
+         TRUE); // Permite capturar teclas especiales como las flechitas de
+                // arriba/abajo, etc.
+  curs_set(0);  // Oculta el cursor.
 
   // Verificación de tamaño de terminal
+  // La librería MenuNcurses utiliza por defecto un ancho fijo de 130 columnas.
   if (COLS < 130 || LINES < 20) {
     clear();
-    printw("===================================================================\n");
+    printw("==================================================================="
+           "=\n");
     printw("  AVISO: Dimension de terminal reducida\n");
     printw("  Tamano detectado: %d columnas x %d filas.\n", COLS, LINES);
-    printw("  MenuNcurses fue disenado con un ancho por defecto de 130 columnas.\n");
-    printw("  Para una visualizacion correcta, se recomienda maximizar la ventana.\n");
-    printw("===================================================================\n\n");
+    printw("  MenuNcurses fue disenado con un ancho por defecto de 130 "
+           "columnas.\n");
+    printw("  Para una visualizacion correcta, se recomienda maximizar la "
+           "ventana.\n");
+    printw("==================================================================="
+           "=\n\n");
     printw("Presiona cualquier tecla para continuar...");
     refresh();
     getch();
@@ -45,11 +51,25 @@ int main() {
   ifstream codigo3("mcode3.txt");
   string t1, t2, m1, m2, m3, linea;
 
-  while (getline(archivo1, linea)) t1 += linea;
-  while (getline(archivo2, linea)) t2 += linea;
-  while (getline(codigo1, linea)) m1 += linea;
-  while (getline(codigo2, linea)) m2 += linea;
-  while (getline(codigo3, linea)) m3 += linea;
+  while (getline(archivo1, linea)) {
+    t1 += linea;
+  }
+
+  while (getline(archivo2, linea)) {
+    t2 += linea;
+  }
+
+  while (getline(codigo1, linea)) {
+    m1 += linea;
+  }
+
+  while (getline(codigo2, linea)) {
+    m2 += linea;
+  }
+
+  while (getline(codigo3, linea)) {
+    m3 += linea;
+  }
 
   SuffixArray suffix1(t1, "transmission1.txt");
   SuffixArray suffix2(t2, "transmission2.txt");
@@ -73,17 +93,26 @@ int main() {
       vector<string> opcionesPrincipales = {
           "1. mcode1",
           "2. mcode2",
-          "3. mcode3",
+          "3. mode3",
       };
 
       MenuNcurses menuSeleccionarMcode("Seleccione el mcode", opcionesPrincipales);
-      int indice = menuSeleccionarMcode.show(); // Retorna 0, 1 o 2 al presionar ENTER[cite: 13]
+      int indice = menuSeleccionarMcode.show(); // Retorna 0, 1 o 2 al presionar ENTER
+      string texto = menuSeleccionarMcode.getOption(indice);
+
+
+      //char mcode;
+      //cin >> mcode;
+      //cin.ignore();
+
+      //int indice = mcode - '1';
 
       if (indice >= 0 && indice < 3) {
         vector<EstadoKMP> estadosT1;
         vector<EstadoKMP> estadosT2;
 
         int posicion1 = buscarKMP(t1, codigos[indice], estadosT1);
+
         int posicion2 = buscarKMP(t2, codigos[indice], estadosT2);
 
         visualizarBusqueda(estadosT1, t1, "transmission1.txt", estadosT2, t2,
@@ -96,54 +125,7 @@ int main() {
     } else if (opcion == "4. Subcadena comun mas larga") {
       visualizarSubcadena(suffix1.obtenerEstadosSubcadena(), t1, t2,
                           "transmission1.txt", "transmission2.txt");
-    } else if (opcion == "5. Resumen de resultados") {
-      vector<string> lineasResumen;
-
-      lineasResumen.push_back("--- Busqueda de mcodes en transmission1 ---");
-      for (int i = 0; i < 3; i++) {
-        vector<EstadoKMP> estados;
-        int posicion = buscarKMP(t1, codigos[i], estados);
-
-        if (posicion != -1)
-          lineasResumen.push_back("true " + to_string(posicion + 1));
-        else
-          lineasResumen.push_back("false");
-      }
-
-      lineasResumen.push_back("");
-      lineasResumen.push_back("--- Busqueda de mcodes en transmission2 ---");
-      for (int i = 0; i < 3; i++) {
-        vector<EstadoKMP> estados;
-        int posicion = buscarKMP(t2, codigos[i], estados);
-
-        if (posicion != -1)
-          lineasResumen.push_back("true " + to_string(posicion + 1));
-        else
-          lineasResumen.push_back("false");
-      }
-
-      lineasResumen.push_back("");
-      lineasResumen.push_back("--- Palindromo mas largo (transmission1) ---");
-      lineasResumen.push_back(to_string(resultado1.first + 1) + " " +
-                             to_string(resultado2.second + 1));
-
-      lineasResumen.push_back("");
-      lineasResumen.push_back("--- Palindromo mas largo (transmission2) ---");
-      lineasResumen.push_back(to_string(resultado2.first + 1) + " " +
-                             to_string(resultado2.second + 1));
-
-      lineasResumen.push_back("");
-      lineasResumen.push_back("--- Subcadena comun mas larga ---");
-      if (comun.first != -1)
-        lineasResumen.push_back(to_string(comun.first + 1) + " " +
-                               to_string(comun.second + 1));
-      else
-        lineasResumen.push_back("-1 -1");
-
-      DetalleNcurses ventanaResumen("Resumen Final de Resultados", lineasResumen);
-      ventanaResumen.mostrar();
-
-    } else if (opcion == "6. Salir" || opcion == "6. Salir" || opcion.empty()) {
+    } else if (opcion == "5. Salir" || opcion.empty()) {
       ejecutando = false;
     }
   }

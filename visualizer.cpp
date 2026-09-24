@@ -28,7 +28,7 @@ string mostrarInicio() {
 
   vector<string> opcionesPrincipales = {
       "1. Prefix Doubling", "2. Busqueda de mcode", "3. Palindromo mas largo",
-      "4. Subcadena comun mas larga", "5. Salir"};
+      "4. Subcadena comun mas larga","5. Resumen de resultados" ,"6. Salir"};
 
   // Crear menu principal.
   MenuNcurses menuPrincipal("Visualizador del proyecto", opcionesPrincipales);
